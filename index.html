@@ -22,7 +22,6 @@
             justify-content: center;
         }
 
-        /* ===== 開始頁面 ===== */
         #startPage {
             width: 100%;
             height: 100%;
@@ -65,7 +64,6 @@
             box-shadow: 0 0 20px #ff00ff;
         }
 
-        /* ===== 遊戲頁面 ===== */
         #gamePage {
             width: 100%;
             height: 100%;
@@ -134,7 +132,6 @@
             50% { transform: translateX(-50%) scale(1.3); }
         }
 
-        /* ===== 結束頁面 ===== */
         #endPage {
             width: 100%;
             height: 100%;
@@ -275,26 +272,16 @@
     </style>
 </head>
 <body>
-    <!-- 眼動儀注視指示器 -->
     <div class="gaze-indicator" id="gazeIndicator"></div>
 
-    <!-- 開始頁面 -->
     <div id="startPage" class="page">
         <svg class="start-balloon" viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
-            <!-- 氣球 -->
             <ellipse cx="100" cy="80" rx="70" ry="80" fill="#FF6B9D" opacity="0.9"/>
             <ellipse cx="100" cy="80" rx="70" ry="80" fill="url(#balloonGradient)" opacity="0.3"/>
-            
-            <!-- 反光 -->
             <ellipse cx="75" cy="50" rx="25" ry="35" fill="white" opacity="0.4"/>
-            
-            <!-- 繩子 -->
             <line x1="100" y1="160" x2="100" y2="220" stroke="#FFD700" stroke-width="4"/>
             <line x1="100" y1="220" x2="100" y2="240" stroke="#FFD700" stroke-width="3"/>
-            
-            <!-- 結 -->
             <circle cx="100" cy="240" r="8" fill="#FFD700"/>
-            
             <defs>
                 <radialGradient id="balloonGradient">
                     <stop offset="0%" style="stop-color:#FF1493;stop-opacity:1" />
@@ -305,14 +292,12 @@
         <div class="info-text">注視氣球 1 秒開始遊戲</div>
     </div>
 
-    <!-- 遊戲頁面 -->
     <div id="gamePage" class="page">
         <div class="counter" id="counter">1/20</div>
         <div class="game-container" id="gameContainer"></div>
         <div class="info-text">注視氣球 1 秒射擊</div>
     </div>
 
-    <!-- 結束頁面 -->
     <div id="endPage" class="page">
         <div class="celebration-text">🎉 完成！ 🎉</div>
         <div class="score-display">你成功戳破了 20 個氣球！</div>
@@ -320,15 +305,14 @@
     </div>
 
     <script>
-        // ===== 配置 =====
-        const GAZE_DURATION = 1000; // 1秒注視時間
+        const GAZE_DURATION = 1000;
         const TOTAL_BALLOONS = 20;
         const BALLOON_COLORS = [
-            '#FF6B9D', '#FF1493', '#FF69B4', '#FFB6C1', // 粉紅色系
-            '#FF4500', '#FF6347', '#FF8C00', '#FFA500', // 紅橙色系
-            '#32CD32', '#00FF00', '#00FA9A', '#00CED1', // 綠青色系
-            '#4169E1', '#1E90FF', '#87CEEB', '#00BFFF', // 藍色系
-            '#9932CC', '#DA70D6', '#FFD700', '#FFE4B5'  // 紫黃色系
+            '#FF6B9D', '#FF1493', '#FF69B4', '#FFB6C1',
+            '#FF4500', '#FF6347', '#FF8C00', '#FFA500',
+            '#32CD32', '#00FF00', '#00FA9A', '#00CED1',
+            '#4169E1', '#1E90FF', '#87CEEB', '#00BFFF',
+            '#9932CC', '#DA70D6', '#FFD700', '#FFE4B5'
         ];
 
         let currentBalloon = 1;
@@ -337,18 +321,15 @@
         let gameStarted = false;
         let mouseX = 0;
         let mouseY = 0;
-        let isPopping = false; // 標記是否正在爆破
+        let isPopping = false;
 
-        // ===== 初始化 =====
         function init() {
             document.querySelector('.start-balloon').addEventListener('mouseenter', startGazing);
             document.querySelector('.start-balloon').addEventListener('mouseleave', stopGazing);
             document.querySelector('.start-balloon').addEventListener('click', startGame);
-            
             updateGazeIndicator();
         }
 
-        // ===== 眼動儀模擬（滑鼠座標） =====
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
@@ -361,7 +342,6 @@
             indicator.style.top = (mouseY - 30) + 'px';
         }
 
-        // ===== 注視事件 =====
         function startGazing(e) {
             if (gameStarted || isPopping) return;
             gazingElement = e.target.closest('.balloon') || e.target.closest('.start-balloon');
@@ -372,7 +352,7 @@
             updateGazeTimer();
         }
 
-        function stopGazing(e) {
+        function stopGazing() {
             if (gazingElement) {
                 gazingElement.classList.remove('gazed');
                 const timer = gazingElement.querySelector('.gaze-timer');
@@ -387,7 +367,6 @@
 
             const elapsed = Date.now() - gazeStartTime;
             const progress = Math.min(elapsed / GAZE_DURATION, 1);
-            
             const timer = gazingElement.querySelector('.gaze-timer');
             if (timer) {
                 const remainingTime = Math.max(0, (1 - progress).toFixed(1));
@@ -409,21 +388,16 @@
             } else if (gazingElement.classList.contains('balloon')) {
                 popBalloon(gazingElement);
             }
-            
-            // 清除注視狀態
             stopGazing();
         }
 
-        // ===== 遊戲開始 =====
         function startGame() {
             gameStarted = true;
             document.getElementById('startPage').style.display = 'none';
             document.getElementById('gamePage').style.display = 'block';
-            
             createBalloon(currentBalloon);
         }
 
-        // ===== 創建氣球 =====
         function createBalloon(number) {
             const container = document.getElementById('gameContainer');
             container.innerHTML = '';
@@ -432,32 +406,22 @@
             balloon.className = 'balloon';
             balloon.id = `balloon-${number}`;
 
-            // 隨機位置但居中
             const offsetX = (Math.random() - 0.5) * 200;
             const offsetY = (Math.random() - 0.5) * 200;
             balloon.style.left = `calc(50% - 40vw + ${offsetX}px)`;
             balloon.style.top = `calc(50% - 40vh + ${offsetY}px)`;
 
-            // SVG 氣球
             const colorIndex = (number - 1) % BALLOON_COLORS.length;
             const color = BALLOON_COLORS[colorIndex];
 
             balloon.innerHTML = `
                 <svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
-                    <!-- 氣球 -->
                     <ellipse cx="100" cy="80" rx="70" ry="80" fill="${color}" opacity="0.9"/>
                     <ellipse cx="100" cy="80" rx="70" ry="80" fill="url(#grad${number})" opacity="0.3"/>
-                    
-                    <!-- 反光 -->
                     <ellipse cx="75" cy="50" rx="25" ry="35" fill="white" opacity="0.4"/>
-                    
-                    <!-- 繩子 -->
                     <line x1="100" y1="160" x2="100" y2="220" stroke="#FFD700" stroke-width="4"/>
                     <line x1="100" y1="220" x2="100" y2="240" stroke="#FFD700" stroke-width="3"/>
-                    
-                    <!-- 結 -->
                     <circle cx="100" cy="240" r="8" fill="#FFD700"/>
-                    
                     <defs>
                         <radialGradient id="grad${number}">
                             <stop offset="0%" style="stop-color:#FF1493;stop-opacity:1" />
@@ -470,19 +434,15 @@
 
             balloon.addEventListener('mouseenter', startGazing);
             balloon.addEventListener('mouseleave', stopGazing);
-
             container.appendChild(balloon);
         }
 
-        // ===== 戳破氣球 =====
         function popBalloon(balloonElement) {
             if (isPopping) return;
             isPopping = true;
 
             playPopSound();
             balloonElement.classList.add('pop-animation');
-            
-            // 生成爆炸粒子
             createExplosion(balloonElement);
 
             setTimeout(() => {
@@ -497,12 +457,10 @@
             }, 600);
         }
 
-        // ===== 爆炸效果 =====
         function createExplosion(balloonElement) {
             const rect = balloonElement.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-
             const colors = ['#FF6B9D', '#FF1493', '#FFD700', '#00FFFF', '#FF4500', '#FF6347', '#32CD32'];
 
             for (let i = 0; i < 20; i++) {
@@ -530,13 +488,11 @@
             }
         }
 
-        // ===== 音效 =====
         function playPopSound() {
             try {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const now = audioContext.currentTime;
 
-                // 高頻 POP 聲
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
                 osc.connect(gain);
@@ -550,7 +506,6 @@
                 osc.start(now);
                 osc.stop(now + 0.1);
 
-                // 低頻震動
                 const osc2 = audioContext.createOscillator();
                 const gain2 = audioContext.createGain();
                 osc2.connect(gain2);
@@ -567,25 +522,18 @@
             }
         }
 
-        // ===== 計數器 =====
         function updateCounter() {
             document.getElementById('counter').textContent = `${currentBalloon}/20`;
         }
 
-        // ===== 結束遊戲 =====
         function endGame() {
             gameStarted = false;
             document.getElementById('gamePage').style.display = 'none';
             document.getElementById('endPage').style.display = 'flex';
-            
-            // 生成彩帶效果
             createConfetti();
-            
-            // 播放慶祝音效
             playCelebrationSound();
         }
 
-        // ===== 彩帶效果 =====
         function createConfetti() {
             for (let i = 0; i < 50; i++) {
                 const confetti = document.createElement('div');
@@ -595,7 +543,6 @@
                 confetti.style.backgroundColor = BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)];
                 confetti.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
                 document.body.appendChild(confetti);
-
                 setTimeout(() => confetti.remove(), 4000);
             }
 
@@ -611,14 +558,12 @@
             document.head.appendChild(style);
         }
 
-        // ===== 慶祝音效 =====
         function playCelebrationSound() {
             try {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const now = audioContext.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50];
 
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                
                 notes.forEach((freq, idx) => {
                     const osc = audioContext.createOscillator();
                     const gain = audioContext.createGain();
@@ -637,7 +582,6 @@
             }
         }
 
-        // ===== 啟動 =====
         init();
     </script>
 </body>
