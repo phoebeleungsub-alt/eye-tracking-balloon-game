@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>眼動儀遊戲 - 射擊氣球</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== 開始頁面 ===== */
+        #startPage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 100;
+        }
+
+        .start-balloon {
+            width: 300px;
+            height: 300px;
+            cursor: pointer;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+            transition: transform 0.2s;
+        }
+
+        .start-balloon:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .gaze-indicator {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            border: 3px solid #ff00ff;
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            background: radial-gradient(circle, rgba(255,0,255,0.3) 0%, rgba(255,0,255,0) 70%);
+            box-shadow: 0 0 20px #ff00ff;
+        }
+
+        /* ===== 遊戲頁面 ===== */
+        #gamePage {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .balloon {
+            position: absolute;
+            cursor: pointer;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
+            transition: transform 0.1s;
+            user-select: none;
+        }
+
+        .balloon svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        .balloon:hover {
+            transform: scale(1.1);
+        }
+
+        .gaze-timer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff4444, #ff0000);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 0 15px rgba(255,0,0,0.8);
+        }
+
+        .balloon.gazed .gaze-timer {
+            display: flex;
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.2); }
+        }
+
+        /* ===== 結束頁面 ===== */
+        #endPage {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 50%, #a8edea 100%);
+            z-index: 100;
+            text-align: center;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .celebration-text {
+            font-size: 80px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            margin-bottom: 30px;
+            animation: bounce 0.6s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        .score-display {
+            font-size: 48px;
+            color: white;
+            font-weight: bold;
+            background: rgba(0,0,0,0.3);
+            padding: 20px 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .restart-btn {
+            padding: 20px 50px;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        .restart-btn:active {
+            transform: scale(0.98);
+        }
+
+        .counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            background: rgba(0,0,0,0.3);
+            padding: 15px 30px;
+            border-radius: 15px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .pop-animation {
+            animation: popBurst 0.6s ease-out forwards;
+        }
+
+        @keyframes popBurst {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .particle-circle {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            animation: particleFloat 0.8s ease-out forwards;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0);
+            }
+        }
+
+        .info-text {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 18px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- 眼動儀注視指示器 -->
+    <div class="gaze-indicator" id="gazeIndicator"></div>
+
+    <!-- 開始頁面 -->
+    <div id="startPage" class="page">
+        <svg class="start-balloon" viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+            <!-- 氣球 -->
+            <ellipse cx="100" cy="80" rx="70" ry="80" fill="#FF6B9D" opacity="0.9"/>
+            <ellipse cx="100" cy="80" rx="70" ry="80" fill="url(#balloonGradient)" opacity="0.3"/>
+            
+            <!-- 反光 -->
+            <ellipse cx="75" cy="50" rx="25" ry="35" fill="white" opacity="0.4"/>
+            
+            <!-- 繩子 -->
+            <line x1="100" y1="160" x2="100" y2="220" stroke="#FFD700" stroke-width="4"/>
+            <line x1="100" y1="220" x2="100" y2="240" stroke="#FFD700" stroke-width="3"/>
+            
+            <!-- 結 -->
+            <circle cx="100" cy="240" r="8" fill="#FFD700"/>
+            
+            <defs>
+                <radialGradient id="balloonGradient">
+                    <stop offset="0%" style="stop-color:#FF1493;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#FF69B4;stop-opacity:1" />
+                </radialGradient>
+            </defs>
+        </svg>
+        <div class="info-text">注視氣球 1 秒開始遊戲</div>
+    </div>
+
+    <!-- 遊戲頁面 -->
+    <div id="gamePage" class="page">
+        <div class="counter" id="counter">1/20</div>
+        <div class="game-container" id="gameContainer"></div>
+        <div class="info-text">注視氣球 1 秒射擊</div>
+    </div>
+
+    <!-- 結束頁面 -->
+    <div id="endPage" class="page">
+        <div class="celebration-text">🎉 完成！ 🎉</div>
+        <div class="score-display">你成功戳破了 20 個氣球！</div>
+        <button class="restart-btn" onclick="location.reload()">再玩一次</button>
+    </div>
+
+    <script>
+        // ===== 配置 =====
+        const GAZE_DURATION = 1000; // 1秒注視時間
+        const BALLOON_SIZE = 150; // 氣球大小 (px)
+        const TOTAL_BALLOONS = 20;
+        const BALLOON_COLORS = [
+            '#FF6B9D', '#FF1493', '#FF69B4', '#FFB6C1', // 粉紅色系
+            '#FF4500', '#FF6347', '#FF8C00', '#FFA500', // 紅橙色系
+            '#32CD32', '#00FF00', '#00FA9A', '#00CED1', // 綠青色系
+            '#4169E1', '#1E90FF', '#87CEEB', '#00BFFF', // 藍色系
+            '#9932CC', '#DA70D6', '#FFD700', '#FFE4B5'  // 紫黃色系
+        ];
+
+        let currentBalloon = 1;
+        let gazingElement = null;
+        let gazeStartTime = null;
+        let gameStarted = false;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        // ===== 初始化 =====
+        function init() {
+            document.querySelector('.start-balloon').addEventListener('mouseenter', startGazing);
+            document.querySelector('.start-balloon').addEventListener('mouseleave', stopGazing);
+            document.querySelector('.start-balloon').addEventListener('click', startGame);
+            
+            updateGazeIndicator();
+        }
+
+        // ===== 眼動儀模擬（滑鼠座標） =====
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            updateGazeIndicator();
+        });
+
+        function updateGazeIndicator() {
+            const indicator = document.getElementById('gazeIndicator');
+            indicator.style.left = (mouseX - 30) + 'px';
+            indicator.style.top = (mouseY - 30) + 'px';
+        }
+
+        // ===== 注視事件 =====
+        function startGazing(e) {
+            if (gameStarted) return;
+            gazingElement = e.target.closest('.balloon') || e.target.closest('.start-balloon');
+            if (!gazingElement) return;
+
+            gazeStartTime = Date.now();
+            gazingElement.classList.add('gazed');
+            updateGazeTimer();
+        }
+
+        function stopGazing(e) {
+            if (gazingElement) {
+                gazingElement.classList.remove('gazed');
+                const timer = gazingElement.querySelector('.gaze-timer');
+                if (timer) timer.textContent = '';
+            }
+            gazingElement = null;
+            gazeStartTime = null;
+        }
+
+        function updateGazeTimer() {
+            if (!gazingElement || !gazeStartTime) return;
+
+            const elapsed = Date.now() - gazeStartTime;
+            const progress = Math.min(elapsed / GAZE_DURATION, 1);
+            
+            const timer = gazingElement.querySelector('.gaze-timer');
+            if (timer) {
+                timer.textContent = Math.ceil((1 - progress) * 10) / 10;
+                if (timer.textContent === '0') timer.textContent = '✓';
+            }
+
+            if (elapsed >= GAZE_DURATION) {
+                onGazeComplete();
+            } else {
+                requestAnimationFrame(updateGazeTimer);
+            }
+        }
+
+        function onGazeComplete() {
+            if (!gazingElement) return;
+
+            if (gazingElement.classList.contains('start-balloon')) {
+                startGame();
+            } else if (gazingElement.classList.contains('balloon')) {
+                popBalloon(gazingElement);
+            }
+        }
+
+        // ===== 遊戲開始 =====
+        function startGame() {
+            gameStarted = true;
+            document.getElementById('startPage').style.display = 'none';
+            document.getElementById('gamePage').style.display = 'block';
+            
+            createBalloon(currentBalloon);
+        }
+
+        // ===== 創建氣球 =====
+        function createBalloon(number) {
+            const container = document.getElementById('gameContainer');
+            container.innerHTML = '';
+
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            balloon.id = `balloon-${number}`;
+
+            // 隨機位置
+            const randomX = Math.random() * (window.innerWidth - BALLOON_SIZE);
+            const randomY = Math.random() * (window.innerHeight - BALLOON_SIZE * 1.5);
+            balloon.style.left = randomX + 'px';
+            balloon.style.top = randomY + 'px';
+            balloon.style.width = BALLOON_SIZE + 'px';
+            balloon.style.height = BALLOON_SIZE + 'px';
+
+            // SVG 氣球
+            const colorIndex = (number - 1) % BALLOON_COLORS.length;
+            const color = BALLOON_COLORS[colorIndex];
+
+            balloon.innerHTML = `
+                <svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 氣球 -->
+                    <ellipse cx="100" cy="80" rx="70" ry="80" fill="${color}" opacity="0.9"/>
+                    <ellipse cx="100" cy="80" rx="70" ry="80" fill="url(#grad${number})" opacity="0.3"/>
+                    
+                    <!-- 反光 -->
+                    <ellipse cx="75" cy="50" rx="25" ry="35" fill="white" opacity="0.4"/>
+                    
+                    <!-- 繩子 -->
+                    <line x1="100" y1="160" x2="100" y2="220" stroke="#FFD700" stroke-width="4"/>
+                    <line x1="100" y1="220" x2="100" y2="240" stroke="#FFD700" stroke-width="3"/>
+                    
+                    <!-- 結 -->
+                    <circle cx="100" cy="240" r="8" fill="#FFD700"/>
+                    
+                    <!-- 數字 (不顯示) -->
+                    <!-- <text x="100" y="85" text-anchor="middle" font-size="32" fill="white" font-weight="bold">${number}</text> -->
+                    
+                    <defs>
+                        <radialGradient id="grad${number}">
+                            <stop offset="0%" style="stop-color:#FF1493;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:${color};stop-opacity:1" />
+                        </radialGradient>
+                    </defs>
+                </svg>
+                <div class="gaze-timer">0</div>
+            `;
+
+            balloon.addEventListener('mouseenter', startGazing);
+            balloon.addEventListener('mouseleave', stopGazing);
+
+            container.appendChild(balloon);
+        }
+
+        // ===== 戳破氣球 =====
+        function popBalloon(balloonElement) {
+            playPopSound();
+            balloonElement.classList.add('pop-animation');
+            
+            // 生成爆炸粒子
+            createExplosion(balloonElement);
+
+            setTimeout(() => {
+                if (currentBalloon >= TOTAL_BALLOONS) {
+                    endGame();
+                } else {
+                    currentBalloon++;
+                    updateCounter();
+                    createBalloon(currentBalloon);
+                }
+            }, 600);
+        }
+
+        // ===== 爆炸效果 =====
+        function createExplosion(balloonElement) {
+            const rect = balloonElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const colors = ['#FF6B9D', '#FF1493', '#FFD700', '#00FFFF', '#FF4500'];
+
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+
+                const particleCircle = document.createElement('div');
+                particleCircle.className = 'particle-circle';
+                particleCircle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+                const angle = (i / 12) * Math.PI * 2;
+                const distance = 150 + Math.random() * 100;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                particleCircle.style.setProperty('--tx', tx + 'px');
+                particleCircle.style.setProperty('--ty', ty + 'px');
+
+                particle.appendChild(particleCircle);
+                document.body.appendChild(particle);
+
+                setTimeout(() => particle.remove(), 800);
+            }
+        }
+
+        // ===== 音效 =====
+        function playPopSound() {
+            // 使用 Web Audio API 生成爆破聲
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const now = audioContext.currentTime;
+
+            // 高頻 POP 聲
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+            osc.start(now);
+            osc.stop(now + 0.1);
+
+            // 低頻震動
+            const osc2 = audioContext.createOscillator();
+            const gain2 = audioContext.createGain();
+            osc2.connect(gain2);
+            gain2.connect(audioContext.destination);
+
+            osc2.frequency.setValueAtTime(150, now);
+            gain2.gain.setValueAtTime(0.2, now);
+            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+            osc2.start(now);
+            osc2.stop(now + 0.15);
+        }
+
+        // ===== 計數器 =====
+        function updateCounter() {
+            document.getElementById('counter').textContent = `${currentBalloon}/20`;
+        }
+
+        // ===== 結束遊戲 =====
+        function endGame() {
+            gameStarted = false;
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('endPage').style.display = 'flex';
+            
+            // 生成彩帶效果
+            createConfetti();
+            
+            // 播放慶祝音效
+            playCelebrationSound();
+        }
+
+        // ===== 彩帶效果 =====
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * window.innerWidth + 'px';
+                confetti.style.top = '-10px';
+                confetti.style.backgroundColor = BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)];
+                confetti.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
+                document.body.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 4000);
+            }
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fall {
+                    to {
+                        transform: translateY(${window.innerHeight + 100}px) rotateZ(360deg);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // ===== 慶祝音效 =====
+        function playCelebrationSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const now = audioContext.currentTime;
+
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            
+            notes.forEach((freq, idx) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.2, now + idx * 0.15);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.15 + 0.3);
+
+                osc.start(now + idx * 0.15);
+                osc.stop(now + idx * 0.15 + 0.3);
+            });
+        }
+
+        // ===== 啟動 =====
+        init();
+    </script>
+</body>
+</html>
