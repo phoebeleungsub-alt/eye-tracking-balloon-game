@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>眼動儀遊戲 - 射擊氣球</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>眼動儀遊戲 - 氣球數數</title>
     <style>
         * {
             margin: 0;
@@ -11,226 +11,156 @@
             box-sizing: border-box;
         }
 
-        body {
-            width: 100vw;
-            height: 100vh;
+        html, body {
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #6a5af9, #8b5cf6);
+        }
+
+        body {
+            position: relative;
         }
 
         #startPage {
-            width: 100%;
-            height: 100%;
+            position: absolute;
+            inset: 0;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            z-index: 100;
+            background: linear-gradient(135deg, #6a5af9, #8b5cf6);
         }
 
         .start-balloon {
-            width: 300px;
-            height: 300px;
+            width: min(80vw, 600px);
+            height: min(80vw, 600px);
+            max-width: 600px;
+            max-height: 600px;
             cursor: pointer;
             animation: float 3s ease-in-out infinite;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
-            transition: transform 0.2s;
-        }
-
-        .start-balloon:hover {
-            transform: scale(1.05);
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
         }
 
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .gaze-indicator {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            border: 3px solid #ff00ff;
-            border-radius: 50%;
-            pointer-events: none;
-            display: none;
-            z-index: 1000;
-            background: radial-gradient(circle, rgba(255,0,255,0.3) 0%, rgba(255,0,255,0) 70%);
-            box-shadow: 0 0 20px #ff00ff;
+            50% { transform: translateY(-18px); }
         }
 
         #gamePage {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            position: absolute;
+            inset: 0;
             display: none;
-            position: relative;
-            overflow: hidden;
+            background: linear-gradient(135deg, #f9a8d4, #f472b6 40%, #fda4af);
         }
 
         .game-container {
+            position: relative;
             width: 100%;
             height: 100%;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .balloon {
             position: absolute;
-            cursor: pointer;
-            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
-            transition: transform 0.1s;
+            width: 250px;
+            height: 250px;
             user-select: none;
-            width: 80vw;
-            height: 80vh;
-            max-width: 90%;
-            max-height: 90%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.04s linear;
+            cursor: pointer;
         }
 
         .balloon svg {
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.25));
         }
 
-        .balloon:hover {
-            transform: scale(1.05);
-        }
-
-        .gaze-timer {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #ff4444, #ff0000);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 28px;
-            box-shadow: 0 0 20px rgba(255,0,0,0.9);
-        }
-
-        .balloon.gazed .gaze-timer {
-            display: flex;
-            animation: pulse 0.3s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.3); }
-        }
-
-        #endPage {
-            width: 100%;
-            height: 100%;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 50%, #a8edea 100%);
-            z-index: 100;
-            text-align: center;
-        }
-
-        .confetti {
-            position: fixed;
-            width: 20px;
-            height: 20px;
+        .balloon.popped {
+            opacity: 0;
             pointer-events: none;
-            z-index: 50;
-        }
-
-        .celebration-text {
-            font-size: 80px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            margin-bottom: 30px;
-            animation: bounce 0.6s ease-in-out infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-30px); }
-        }
-
-        .score-display {
-            font-size: 48px;
-            color: white;
-            font-weight: bold;
-            background: rgba(0,0,0,0.3);
-            padding: 20px 40px;
-            border-radius: 20px;
-            margin-bottom: 40px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        .restart-btn {
-            padding: 20px 50px;
-            font-size: 32px;
-            font-weight: bold;
-            color: white;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-
-        .restart-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-        }
-
-        .restart-btn:active {
-            transform: scale(0.98);
         }
 
         .counter {
             position: fixed;
-            top: 30px;
-            right: 30px;
-            font-size: 48px;
+            top: 28px;
+            right: 28px;
+            font-size: clamp(32px, 4vw, 52px);
             font-weight: bold;
             color: white;
-            background: rgba(0,0,0,0.3);
-            padding: 15px 30px;
-            border-radius: 15px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            z-index: 10;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 14px 22px;
+            border-radius: 18px;
+            z-index: 20;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.18);
         }
 
-        .pop-animation {
-            animation: popBurst 0.6s ease-out forwards !important;
+        .info-text {
+            position: fixed;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 18px;
+            background: rgba(0,0,0,0.25);
+            padding: 12px 20px;
+            border-radius: 10px;
+            z-index: 20;
         }
 
-        @keyframes popBurst {
-            0% {
-                transform: scale(1) !important;
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.2) !important;
-                opacity: 1;
-            }
-            100% {
-                transform: scale(0) !important;
-                opacity: 0;
-            }
+        .gaze-indicator {
+            position: fixed;
+            width: 58px;
+            height: 58px;
+            border: 3px solid rgba(255, 0, 255, 0.9);
+            border-radius: 50%;
+            background: rgba(255, 0, 255, 0.18);
+            box-shadow: 0 0 18px rgba(255,0,255,0.8);
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        #endPage {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: linear-gradient(135deg, #ff9a56, #ff6a88 40%, #a8edea);
+            text-align: center;
+        }
+
+        .celebration {
+            font-size: clamp(52px, 7vw, 90px);
+            color: white;
+            font-weight: bold;
+            margin-bottom: 26px;
+            text-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .final-score {
+            font-size: clamp(28px, 4vw, 48px);
+            color: white;
+            background: rgba(0,0,0,0.18);
+            padding: 18px 30px;
+            border-radius: 20px;
+            margin-bottom: 28px;
+            font-weight: bold;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: clamp(26px, 3vw, 36px);
+            font-weight: bold;
+            border: none;
+            border-radius: 30px;
+            padding: 18px 34px;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.2);
         }
 
         .particle {
@@ -239,14 +169,14 @@
             z-index: 999;
         }
 
-        .particle-circle {
+        .particle-dot {
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            animation: particleFloat 0.8s ease-out forwards;
+            animation: particleFly 0.9s ease-out forwards;
         }
 
-        @keyframes particleFloat {
+        @keyframes particleFly {
             0% {
                 opacity: 1;
                 transform: translate(0, 0) scale(1);
@@ -257,216 +187,315 @@
             }
         }
 
-        .info-text {
+        .confetti {
             position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 18px;
-            background: rgba(0,0,0,0.3);
-            padding: 15px 30px;
-            border-radius: 10px;
-            text-align: center;
+            width: 16px;
+            height: 16px;
+            pointer-events: none;
+            z-index: 50;
         }
     </style>
 </head>
 <body>
-    <div class="gaze-indicator" id="gazeIndicator"></div>
+    <div class="gaze-indicator" id="gazeIndicator" style="display:none;"></div>
 
-    <div id="startPage" class="page">
+    <div id="startPage">
         <svg class="start-balloon" viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="100" cy="80" rx="70" ry="80" fill="#FF6B9D" opacity="0.9"/>
-            <ellipse cx="100" cy="80" rx="70" ry="80" fill="url(#balloonGradient)" opacity="0.3"/>
+            <ellipse cx="100" cy="80" rx="70" ry="80" fill="#ff6ba7" opacity="0.95"/>
+            <ellipse cx="100" cy="80" rx="70" ry="80" fill="url(#grad)" opacity="0.3"/>
             <ellipse cx="75" cy="50" rx="25" ry="35" fill="white" opacity="0.4"/>
-            <line x1="100" y1="160" x2="100" y2="220" stroke="#FFD700" stroke-width="4"/>
-            <line x1="100" y1="220" x2="100" y2="240" stroke="#FFD700" stroke-width="3"/>
-            <circle cx="100" cy="240" r="8" fill="#FFD700"/>
+            <line x1="100" y1="160" x2="100" y2="220" stroke="#facc15" stroke-width="4"/>
+            <line x1="100" y1="220" x2="100" y2="240" stroke="#facc15" stroke-width="3"/>
+            <circle cx="100" cy="240" r="8" fill="#facc15"/>
             <defs>
-                <radialGradient id="balloonGradient">
-                    <stop offset="0%" style="stop-color:#FF1493;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#FF69B4;stop-opacity:1" />
+                <radialGradient id="grad">
+                    <stop offset="0%" style="stop-color:#ff1493;stop-opacity:1"/>
+                    <stop offset="100%" style="stop-color:#ff6ba7;stop-opacity:1"/>
                 </radialGradient>
             </defs>
         </svg>
-        <div class="info-text">注視氣球 1 秒開始遊戲</div>
     </div>
 
-    <div id="gamePage" class="page">
-        <div class="counter" id="counter">1/20</div>
-        <div class="game-container" id="gameContainer"></div>
-        <div class="info-text">注視氣球 1 秒射擊</div>
+    <div id="gamePage">
+        <div id="counter" class="counter">🎈 1</div>
+        <div id="gameContainer" class="game-container"></div>
+        <div class="info-text">注視下一個氣球，任意爆破</div>
     </div>
 
-    <div id="endPage" class="page">
-        <div class="celebration-text">🎉 完成！ 🎉</div>
-        <div class="score-display">你成功戳破了 20 個氣球！</div>
+    <div id="endPage">
+        <div class="celebration">🎉 完成！ 🎉</div>
+        <div class="final-score">總共完成 20 個氣球</div>
         <button class="restart-btn" onclick="location.reload()">再玩一次</button>
     </div>
 
     <script>
+        const TOTAL_ROUNDS = 20;
         const GAZE_DURATION = 1000;
-        const TOTAL_BALLOONS = 20;
+
+        const CANTONESE_NUMBERS = {
+            1: '一', 2: '二', 3: '三', 4: '四', 5: '五',
+            6: '六', 7: '七', 8: '八', 9: '九', 10: '十',
+            11: '十一', 12: '十二', 13: '十三', 14: '十四', 15: '十五',
+            16: '十六', 17: '十七', 18: '十八', 19: '十九', 20: '二十'
+        };
+
         const BALLOON_COLORS = [
-            '#FF6B9D', '#FF1493', '#FF69B4', '#FFB6C1',
+            '#FF6B9D', '#FF1493', '#FF69B4', '#FFA3B1',
             '#FF4500', '#FF6347', '#FF8C00', '#FFA500',
-            '#32CD32', '#00FF00', '#00FA9A', '#00CED1',
-            '#4169E1', '#1E90FF', '#87CEEB', '#00BFFF',
-            '#9932CC', '#DA70D6', '#FFD700', '#FFE4B5'
+            '#00C853', '#00D084', '#00E676', '#00C9FF',
+            '#4169E1', '#1E90FF', '#80D8FF', '#00BFFF',
+            '#9B30FF', '#BA68C8', '#FFD740', '#F9A825'
         ];
 
-        let currentBalloon = 1;
-        let gazingElement = null;
+        let currentRound = 1;
+        let totalBalloonsInRound = 1;
+        let balloonsPoppedInRound = 0;
+        let mouseX = 0, mouseY = 0;
+        let currentGazeTarget = null;
+        let gazeIntervalId = null;
         let gazeStartTime = null;
-        let gameStarted = false;
-        let mouseX = 0;
-        let mouseY = 0;
-        let isPopping = false;
-        let gazeTimerId = null;
+        let activeAudioContext = null;
+
+        let startBalloon = document.querySelector('.start-balloon');
+
+        // 初始化音訊上下文和背景音樂
+        function initAudioContext() {
+            try {
+                if (!activeAudioContext) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    activeAudioContext = new AudioCtx();
+                }
+                
+                if (activeAudioContext.state === 'suspended') {
+                    activeAudioContext.resume().then(() => {
+                        playBackgroundMusic();
+                    });
+                } else {
+                    playBackgroundMusic();
+                }
+            } catch (e) {
+                console.log('音訊初始化錯誤：', e);
+            }
+        }
 
         function init() {
-            document.querySelector('.start-balloon').addEventListener('mouseenter', startGazing);
-            document.querySelector('.start-balloon').addEventListener('mouseleave', stopGazing);
-            document.querySelector('.start-balloon').addEventListener('click', startGame);
+            bindStartBalloon();
             updateGazeIndicator();
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                updateGazeIndicator();
+                handleGazeFromMouse(mouseX, mouseY);
+            });
+
+            // 立即初始化音訊並開始播放背景音樂
+            initAudioContext();
         }
 
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            updateGazeIndicator();
-            
-            // 檢查注視是否在有效目標上
-            if (gazingElement && gazeStartTime) {
-                const targetElement = document.elementFromPoint(mouseX, mouseY);
-                if (!targetElement || (!targetElement.closest('.balloon') && !targetElement.closest('.start-balloon'))) {
-                    stopGazing();
-                }
-            }
-        });
-
-        function updateGazeIndicator() {
-            const indicator = document.getElementById('gazeIndicator');
-            indicator.style.left = (mouseX - 30) + 'px';
-            indicator.style.top = (mouseY - 30) + 'px';
-        }
-
-        function startGazing(e) {
-            if (gameStarted || isPopping) return;
-            gazingElement = e.target.closest('.balloon') || e.target.closest('.start-balloon');
-            if (!gazingElement) return;
-
-            gazeStartTime = Date.now();
-            gazingElement.classList.add('gazed');
-            updateGazeTimer();
-        }
-
-        function stopGazing() {
-            if (gazingElement) {
-                gazingElement.classList.remove('gazed');
-                const timer = gazingElement.querySelector('.gaze-timer');
-                if (timer) timer.textContent = '';
-            }
-            gazingElement = null;
-            gazeStartTime = null;
-            if (gazeTimerId) clearTimeout(gazeTimerId);
-        }
-
-        function updateGazeTimer() {
-            if (!gazingElement || !gazeStartTime) return;
-
-            const elapsed = Date.now() - gazeStartTime;
-            const progress = Math.min(elapsed / GAZE_DURATION, 1);
-            const timer = gazingElement.querySelector('.gaze-timer');
-            if (timer) {
-                const remainingTime = Math.max(0, (1 - progress).toFixed(1));
-                timer.textContent = remainingTime === '0' ? '✓' : remainingTime;
-            }
-
-            if (elapsed >= GAZE_DURATION) {
-                console.log('注視完成！');
-                onGazeComplete();
-            } else {
-                gazeTimerId = setTimeout(updateGazeTimer, 50);
-            }
-        }
-
-        function onGazeComplete() {
-            if (!gazingElement) return;
-
-            if (gazingElement.classList.contains('start-balloon')) {
-                startGame();
-            } else if (gazingElement.classList.contains('balloon')) {
-                popBalloon(gazingElement);
-            }
-            stopGazing();
+        function bindStartBalloon() {
+            startBalloon.addEventListener('mouseenter', () => {
+                startGazeTimer(startBalloon);
+            });
+            startBalloon.addEventListener('mouseleave', stopGazeTimer);
+            startBalloon.addEventListener('click', startGame);
         }
 
         function startGame() {
-            gameStarted = true;
             document.getElementById('startPage').style.display = 'none';
             document.getElementById('gamePage').style.display = 'block';
-            createBalloon(currentBalloon);
+            currentRound = 1;
+            balloonsPoppedInRound = 0;
+            totalBalloonsInRound = currentRound;
+            createRoundBalloons();
+            speakNumber(currentRound);
+            updateCounter();
         }
 
-        function createBalloon(number) {
+        function updateCounter() {
+            document.getElementById('counter').textContent = `🎈 ${currentRound}`;
+        }
+
+        function createRoundBalloons() {
             const container = document.getElementById('gameContainer');
             container.innerHTML = '';
+            totalBalloonsInRound = currentRound;
+            balloonsPoppedInRound = 0;
 
-            const balloon = document.createElement('div');
-            balloon.className = 'balloon';
-            balloon.id = `balloon-${number}`;
+            const positions = generateCenterFirstPositions(totalBalloonsInRound);
 
-            const offsetX = (Math.random() - 0.5) * 200;
-            const offsetY = (Math.random() - 0.5) * 200;
-            balloon.style.left = `calc(50% - 40vw + ${offsetX}px)`;
-            balloon.style.top = `calc(50% - 40vh + ${offsetY}px)`;
+            positions.forEach((pos, idx) => {
+                const balloon = document.createElement('div');
+                balloon.className = 'balloon';
+                balloon.style.left = pos.x + 'px';
+                balloon.style.top = pos.y + 'px';
 
-            const colorIndex = (number - 1) % BALLOON_COLORS.length;
-            const color = BALLOON_COLORS[colorIndex];
+                const color = BALLOON_COLORS[idx % BALLOON_COLORS.length];
+                balloon.innerHTML = `
+                    <svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="100" cy="80" rx="70" ry="80" fill="${color}" opacity="0.95"/>
+                        <ellipse cx="100" cy="80" rx="70" ry="80" fill="url(#grad${idx})" opacity="0.3"/>
+                        <ellipse cx="75" cy="50" rx="25" ry="35" fill="white" opacity="0.38"/>
+                        <line x1="100" y1="160" x2="100" y2="220" stroke="#facc15" stroke-width="4"/>
+                        <line x1="100" y1="220" x2="100" y2="240" stroke="#facc15" stroke-width="3"/>
+                        <circle cx="100" cy="240" r="8" fill="#facc15"/>
+                        <defs>
+                            <radialGradient id="grad${idx}">
+                                <stop offset="0%" style="stop-color:#ff1493;stop-opacity:1"/>
+                                <stop offset="100%" style="stop-color:${color};stop-opacity:1"/>
+                            </radialGradient>
+                        </defs>
+                    </svg>
+                `;
 
-            balloon.innerHTML = `
-                <svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
-                    <ellipse cx="100" cy="80" rx="70" ry="80" fill="${color}" opacity="0.9"/>
-                    <ellipse cx="100" cy="80" rx="70" ry="80" fill="url(#grad${number})" opacity="0.3"/>
-                    <ellipse cx="75" cy="50" rx="25" ry="35" fill="white" opacity="0.4"/>
-                    <line x1="100" y1="160" x2="100" y2="220" stroke="#FFD700" stroke-width="4"/>
-                    <line x1="100" y1="220" x2="100" y2="240" stroke="#FFD700" stroke-width="3"/>
-                    <circle cx="100" cy="240" r="8" fill="#FFD700"/>
-                    <defs>
-                        <radialGradient id="grad${number}">
-                            <stop offset="0%" style="stop-color:#FF1493;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:${color};stop-opacity:1" />
-                        </radialGradient>
-                    </defs>
-                </svg>
-                <div class="gaze-timer">0</div>
-            `;
+                balloon.addEventListener('mouseenter', () => {
+                    startGazeTimer(balloon);
+                });
 
-            balloon.addEventListener('mouseenter', startGazing);
-            balloon.addEventListener('mouseleave', stopGazing);
-            container.appendChild(balloon);
+                balloon.addEventListener('mouseleave', () => {
+                    if (currentGazeTarget === balloon) stopGazeTimer();
+                });
+
+                container.appendChild(balloon);
+            });
         }
 
-        function popBalloon(balloonElement) {
-            if (isPopping) return;
-            isPopping = true;
+        function generateCenterFirstPositions(count) {
+            const containerW = window.innerWidth;
+            const containerH = window.innerHeight;
+            const spacingX = 220;
+            const spacingY = 220;
 
-            console.log('氣球破裂！');
-            playPopSound();
-            balloonElement.classList.add('pop-animation');
-            createExplosion(balloonElement);
+            const cols = Math.ceil(Math.sqrt(count));
+            const rows = Math.ceil(count / cols);
 
-            setTimeout(() => {
-                if (currentBalloon >= TOTAL_BALLOONS) {
-                    endGame();
-                } else {
-                    currentBalloon++;
-                    updateCounter();
-                    isPopping = false;
-                    createBalloon(currentBalloon);
+            const grid = [];
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (grid.length >= count) break;
+                    const x = (c - (cols - 1) / 2) * spacingX;
+                    const y = (r - (rows - 1) / 2) * spacingY;
+                    grid.push({ x, y });
                 }
-            }, 600);
+            }
+
+            const centerX = containerW / 2 - 125;
+            const centerY = containerH / 2 - 125;
+
+            const ordered = grid
+                .map(p => ({ ...p, dist: Math.hypot(p.x, p.y) }))
+                .sort((a, b) => a.dist - b.dist)
+                .map(p => ({ x: centerX + p.x, y: centerY + p.y }));
+
+            return ordered.slice(0, count);
+        }
+
+        function handleGazeFromMouse(mouseX, mouseY) {
+            if (!document.getElementById('gamePage').style.display || document.getElementById('gamePage').style.display === 'none') return;
+
+            const target = document.elementFromPoint(mouseX, mouseY);
+            if (!target) return;
+
+            const balloon = target.closest('.balloon');
+            if (balloon) {
+                startGazeTimer(balloon);
+            } else if (currentGazeTarget) {
+                stopGazeTimer();
+            }
+        }
+
+        function startGazeTimer(element) {
+            if (!element) return;
+
+            if (element === startBalloon) {
+                currentGazeTarget = element;
+            } else if (!element.classList.contains('balloon')) {
+                return;
+            }
+
+            if (currentGazeTarget === element && gazeIntervalId) return;
+
+            stopGazeTimer();
+            currentGazeTarget = element;
+            gazeStartTime = performance.now();
+
+            gazeIntervalId = setInterval(() => {
+                if (!currentGazeTarget || !gazeStartTime) return;
+
+                const elapsed = performance.now() - gazeStartTime;
+                const progress = Math.min(elapsed / GAZE_DURATION, 1);
+                const scale = 1 + progress * 0.3;
+
+                currentGazeTarget.style.transform = `scale(${scale})`;
+
+                if (elapsed >= GAZE_DURATION) {
+                    triggerGazeComplete();
+                }
+            }, 30);
+        }
+
+        function stopGazeTimer() {
+            if (gazeIntervalId) {
+                clearInterval(gazeIntervalId);
+                gazeIntervalId = null;
+            }
+
+            if (currentGazeTarget) {
+                currentGazeTarget.style.transform = 'scale(1)';
+                currentGazeTarget = null;
+            }
+
+            gazeStartTime = null;
+        }
+
+        function triggerGazeComplete() {
+            if (!currentGazeTarget) return;
+
+            const target = currentGazeTarget;
+
+            if (target === startBalloon) {
+                startGame();
+                stopGazeTimer();
+                return;
+            }
+
+            if (target.classList.contains('balloon')) {
+                popBalloon(target);
+            }
+
+            stopGazeTimer();
+        }
+
+        function popBalloon(balloon) {
+            if (!balloon || balloon.classList.contains('popped')) return;
+
+            balloon.classList.add('popped');
+            playPopSound();
+            createExplosion(balloon);
+
+            balloonsPoppedInRound++;
+            speakNumber(balloonsPoppedInRound);
+
+            if (balloonsPoppedInRound >= totalBalloonsInRound) {
+                setTimeout(() => {
+                    if (currentRound >= TOTAL_ROUNDS) {
+                        endGame();
+                    } else {
+                        currentRound++;
+                        updateCounter();
+                        createRoundBalloons();
+                        speakNumber(currentRound);
+                    }
+                }, 500);
+            }
+        }
+
+        function endGame() {
+            document.getElementById('gamePage').style.display = 'none';
+            document.getElementById('endPage').style.display = 'flex';
+            createConfetti();
+            playCelebrationSound();
+            speakText('二十');
         }
 
         function createExplosion(balloonElement) {
@@ -475,123 +504,186 @@
             const centerY = rect.top + rect.height / 2;
             const colors = ['#FF6B9D', '#FF1493', '#FFD700', '#00FFFF', '#FF4500', '#FF6347', '#32CD32'];
 
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 30; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = centerX + 'px';
                 particle.style.top = centerY + 'px';
 
-                const particleCircle = document.createElement('div');
-                particleCircle.className = 'particle-circle';
-                particleCircle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                const dot = document.createElement('div');
+                dot.className = 'particle-dot';
+                dot.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
 
-                const angle = (i / 20) * Math.PI * 2;
-                const distance = 200 + Math.random() * 150;
+                const angle = (i / 30) * Math.PI * 2;
+                const distance = 280 + Math.random() * 200;
                 const tx = Math.cos(angle) * distance;
                 const ty = Math.sin(angle) * distance;
 
-                particleCircle.style.setProperty('--tx', tx + 'px');
-                particleCircle.style.setProperty('--ty', ty + 'px');
+                dot.style.setProperty('--tx', tx + 'px');
+                dot.style.setProperty('--ty', ty + 'px');
 
-                particle.appendChild(particleCircle);
+                particle.appendChild(dot);
                 document.body.appendChild(particle);
 
-                setTimeout(() => particle.remove(), 800);
+                setTimeout(() => particle.remove(), 900);
             }
-        }
-
-        function playPopSound() {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const now = audioContext.currentTime;
-
-                const osc = audioContext.createOscillator();
-                const gain = audioContext.createGain();
-                osc.connect(gain);
-                gain.connect(audioContext.destination);
-
-                osc.frequency.setValueAtTime(800, now);
-                osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-
-                osc.start(now);
-                osc.stop(now + 0.1);
-
-                const osc2 = audioContext.createOscillator();
-                const gain2 = audioContext.createGain();
-                osc2.connect(gain2);
-                gain2.connect(audioContext.destination);
-
-                osc2.frequency.setValueAtTime(150, now);
-                gain2.gain.setValueAtTime(0.2, now);
-                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-
-                osc2.start(now);
-                osc2.stop(now + 0.15);
-            } catch (e) {
-                console.log('Audio context error:', e);
-            }
-        }
-
-        function updateCounter() {
-            document.getElementById('counter').textContent = `${currentBalloon}/20`;
-        }
-
-        function endGame() {
-            gameStarted = false;
-            document.getElementById('gamePage').style.display = 'none';
-            document.getElementById('endPage').style.display = 'flex';
-            createConfetti();
-            playCelebrationSound();
         }
 
         function createConfetti() {
             for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = Math.random() * window.innerWidth + 'px';
-                confetti.style.top = '-10px';
-                confetti.style.backgroundColor = BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)];
-                confetti.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
-                document.body.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 4000);
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * window.innerWidth + 'px';
+                c.style.top = '-20px';
+                c.style.backgroundColor = BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)];
+                c.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 4000);
             }
 
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes fall {
                     to {
-                        transform: translateY(${window.innerHeight + 100}px) rotateZ(360deg);
                         opacity: 0;
+                        transform: translateY(${window.innerHeight + 100}px) rotateZ(360deg);
                     }
                 }
             `;
             document.head.appendChild(style);
         }
 
-        function playCelebrationSound() {
+        function playBackgroundMusic() {
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const now = audioContext.currentTime;
-                const notes = [523.25, 659.25, 783.99, 1046.50];
+                if (!activeAudioContext) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    activeAudioContext = new AudioCtx();
+                }
 
-                notes.forEach((freq, idx) => {
-                    const osc = audioContext.createOscillator();
-                    const gain = audioContext.createGain();
+                const ctx = activeAudioContext;
+                const notes = [440, 494, 523, 587, 659, 587, 523, 494];
+                let nextStart = ctx.currentTime + 0.02;
+
+                function playLoop() {
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+
+                        osc.type = 'sine';
+                        osc.frequency.value = freq;
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+
+                        const t = nextStart + idx * 0.18;
+                        gain.gain.setValueAtTime(0.15, t);
+                        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+                        osc.start(t);
+                        osc.stop(t + 0.16);
+                    });
+
+                    nextStart += 1.5;
+                    setTimeout(playLoop, 1500);
+                }
+
+                playLoop();
+            } catch (e) {
+                console.log('背景音樂錯誤：', e);
+            }
+        }
+
+        function playPopSound() {
+            try {
+                if (!activeAudioContext) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    activeAudioContext = new AudioCtx();
+                }
+
+                const ctx = activeAudioContext;
+                const now = ctx.currentTime;
+
+                const configs = [
+                    { type: 'sine', f1: 1200, f2: 200, gain: 0.85, dur: 0.18 },
+                    { type: 'sine', f1: 300, f2: 50, gain: 0.95, dur: 0.22 },
+                    { type: 'sine', f1: 800, f2: 160, gain: 0.72, dur: 0.13 },
+                    { type: 'square', f1: 2000, f2: 700, gain: 0.65, dur: 0.09 }
+                ];
+
+                configs.forEach((cfg, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = cfg.type;
+                    osc.frequency.setValueAtTime(cfg.f1, now + idx * 0.02);
+                    osc.frequency.exponentialRampToValueAtTime(cfg.f2, now + idx * 0.02 + cfg.dur);
+
+                    gain.gain.setValueAtTime(cfg.gain, now + idx * 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.02 + cfg.dur);
+
                     osc.connect(gain);
-                    gain.connect(audioContext.destination);
+                    gain.connect(ctx.destination);
 
-                    osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0.2, now + idx * 0.15);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.15 + 0.3);
-
-                    osc.start(now + idx * 0.15);
-                    osc.stop(now + idx * 0.15 + 0.3);
+                    osc.start(now + idx * 0.02);
+                    osc.stop(now + idx * 0.02 + cfg.dur);
                 });
             } catch (e) {
-                console.log('Audio context error:', e);
+                console.log('爆破音效錯誤：', e);
             }
+        }
+
+        function playCelebrationSound() {
+            try {
+                if (!activeAudioContext) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    activeAudioContext = new AudioCtx();
+                }
+
+                const ctx = activeAudioContext;
+                const now = ctx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.5, 1046.5, 783.99, 659.25];
+
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    const t = now + idx * 0.15;
+                    gain.gain.setValueAtTime(0.35, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+                    osc.start(t);
+                    osc.stop(t + 0.28);
+                });
+            } catch (e) {
+                console.log('結束音效錯誤：', e);
+            }
+        }
+
+        function speakText(text) {
+            try {
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'zh-HK';
+                u.rate = 0.93;
+                u.pitch = 1.2;
+                u.volume = 1;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(u);
+            } catch (e) {
+                console.log('語音錯誤：', e);
+            }
+        }
+
+        function speakNumber(value) {
+            const text = CANTONESE_NUMBERS[value] || String(value);
+            speakText(text);
+        }
+
+        function updateGazeIndicator() {
+            const indicator = document.getElementById('gazeIndicator');
+            indicator.style.left = (mouseX - 29) + 'px';
+            indicator.style.top = (mouseY - 29) + 'px';
         }
 
         init();
