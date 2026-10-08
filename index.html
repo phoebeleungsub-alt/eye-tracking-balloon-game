@@ -124,7 +124,7 @@
 
         .balloon.gazed .gaze-timer {
             display: flex;
-            animation: pulse 0.3s ease-in-out;
+            animation: pulse 0.3s ease-in-out infinite;
         }
 
         @keyframes pulse {
@@ -322,6 +322,7 @@
         let mouseX = 0;
         let mouseY = 0;
         let isPopping = false;
+        let gazeTimerId = null;
 
         function init() {
             document.querySelector('.start-balloon').addEventListener('mouseenter', startGazing);
@@ -334,6 +335,14 @@
             mouseX = e.clientX;
             mouseY = e.clientY;
             updateGazeIndicator();
+            
+            // 檢查注視是否在有效目標上
+            if (gazingElement && gazeStartTime) {
+                const targetElement = document.elementFromPoint(mouseX, mouseY);
+                if (!targetElement || (!targetElement.closest('.balloon') && !targetElement.closest('.start-balloon'))) {
+                    stopGazing();
+                }
+            }
         });
 
         function updateGazeIndicator() {
@@ -360,6 +369,7 @@
             }
             gazingElement = null;
             gazeStartTime = null;
+            if (gazeTimerId) clearTimeout(gazeTimerId);
         }
 
         function updateGazeTimer() {
@@ -374,9 +384,10 @@
             }
 
             if (elapsed >= GAZE_DURATION) {
+                console.log('注視完成！');
                 onGazeComplete();
             } else {
-                requestAnimationFrame(updateGazeTimer);
+                gazeTimerId = setTimeout(updateGazeTimer, 50);
             }
         }
 
@@ -441,6 +452,7 @@
             if (isPopping) return;
             isPopping = true;
 
+            console.log('氣球破裂！');
             playPopSound();
             balloonElement.classList.add('pop-animation');
             createExplosion(balloonElement);
